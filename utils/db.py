@@ -3,12 +3,13 @@ from contextlib import contextmanager
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from models import Base
 
-from logger import LOG
+from utils.constants import Constants
+from utils.models import Base
+from utils.logger import LOG
 
 SQLITE_PREFIX = "sqlite:///"
-DATABASE = "output/jarvis.db"
+DATABASE = Constants.MEDIA_FOLDER + "jarvis.db"
 ECHO = True if LOG.level == "DEBUG" else False
 
 def get_engine():
