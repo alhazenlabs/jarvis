@@ -1,0 +1,4 @@
+output/shard*
+output/jarvis*
+__pycache__/
+ENV
