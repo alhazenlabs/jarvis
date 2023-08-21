@@ -1,0 +1,19 @@
+{
+	"id": "chatcmpl-7pskF1YiXheeR04y22xowVwGAr32M",
+	"object": "chat.completion",
+	"created": 1692599523,
+	"model": "gpt-3.5-turbo-0613",
+	"choices": [{
+		"index": 0,
+		"message": {
+			"role": "assistant",
+			"content": "1. Chikoo (Sapodilla): Chikoo is a delicious fruit rich in fiber, providing about 5 grams of fiber per serving.\n\n2. Guava: Guava is packed with dietary fiber, offering about 9 grams of fiber per serving.\n\n3. Papaya: Papaya is not only a delicious fruit but also a great source of fiber, providing approximately 2.5 grams of fiber per serving.\n\n4. Kiwi: Kiwi fruit contains a high amount of fiber, with around 3 grams of fiber per serving.\n\n5. Oranges: Oranges are not only a good source of vitamin C but also contain about 3 grams of fiber per serving.\n\n6. Pears: Pears are rich in fiber, providing around 5 grams of fiber per serving.\n\n7. Apples: Apples are commonly available in India and are a great source of fiber, offering about 4 grams of fiber per serving.\n\n8. Bananas: Bananas are packed with fiber, providing approximately 3 grams of fiber per serving.\n\n9. Raspberries: Though not as commonly found in India, raspberries are high in fiber, offering around 8 grams of fiber per serving.\n\n10. Blackberries: Blackberries are also rich in fiber, providing about 8 grams of fiber per serving.\n\nRemember to include these fruits in your diet along with a balanced meal to reap the benefits of their high fiber content!",
+			"finish_reason": "stop"
+		}
+	}],
+	"usage": {
+		"prompt_tokens": 24,
+		"completion_tokens": 292,
+		"total_tokens": 316
+	}
+}

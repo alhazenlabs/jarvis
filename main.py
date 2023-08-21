@@ -1,3 +1,4 @@
+from core.response import AI
 from output.texttospeech import TextToSpeech
 from utils.logger import LOG
 from utils.db import load_db
@@ -7,9 +8,12 @@ text = """
 """  
 
 if __name__ == "__main__":
-    # Connect to a sqllite-db
-    LOG.info(text)
-    load_db()
+    # # Connect to a sqllite-db
+    # LOG.info(text)
+    # load_db()
 
-    tt = TextToSpeech(text)
-    tt.save_and_play()
+    ai = AI()
+    message = input("User : ")
+
+    response = ai.getResponse(message)
+    TextToSpeech(response).save_and_play()

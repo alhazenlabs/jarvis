@@ -1,4 +1,5 @@
 media/shard*
 media/jarvis*
-__pycache__/
+**/__pycache__/ 
 ENV
+secrets.sh
