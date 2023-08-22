@@ -10,7 +10,7 @@ text = """
 if __name__ == "__main__":
     # # Connect to a sqllite-db
     # LOG.info(text)
-    # load_db()
+    load_db()
 
     ai = AI()
     message = input("User : ")

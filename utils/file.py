@@ -1,7 +1,7 @@
 import os
 
 from utils.constants import Constants
-from utils.models import SpeechFileToText
+from data_api.sftt_dao import SfttDao
 from utils.logger import LOG
 
 DIRECTORY = Constants.MEDIA_FOLDER + "shard{}/"
@@ -10,10 +10,7 @@ SHARD_LENGTH = 2000
 
 def getSpeechFileFromText(session, text, is_input=0):
     # is_input is the parameter to denote if the speech is user generated(1) or system generated(0)
-    sftt = SpeechFileToText(text, is_input)
-    session.add(sftt)
-    session.flush()
-    return sftt.id
+    return SfttDao.addText(session, text, is_input).id
 
 def getDirectoryforSpeechSave(id):
     LOG.debug("checking the id if it classifies for any shards")

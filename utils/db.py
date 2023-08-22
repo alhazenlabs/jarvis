@@ -4,8 +4,8 @@ from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from data_api.models import Base
 from utils.constants import Constants
-from utils.models import Base
 from utils.logger import LOG
 
 SQLITE_PREFIX = "sqlite:///"
