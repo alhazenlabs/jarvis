@@ -103,7 +103,7 @@ class Recorder(object):
     
     @staticmethod
     def get_rms(data, width=DEFAULT_WIDTH):
-        LOG.debug(f"current data for reading the rms: {data}")
+        # LOG.debug(f"current data for reading the rms: {data}")
         return math.sqrt(abs(audioop.avg(data, width)))
 
     

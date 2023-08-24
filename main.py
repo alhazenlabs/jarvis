@@ -1,3 +1,5 @@
+from input.recorder import Recorder
+from data_api.speech_to_text_dao import SpeechToTextDao
 from core.response import AI
 from output.texttospeech import TextToSpeech
 from utils.logger import LOG
@@ -8,12 +10,20 @@ text = """
 """  
 
 if __name__ == "__main__":
-    # # Connect to a sqllite-db
-    # LOG.info(text)
     load_db()
 
+    r = Recorder()
     ai = AI()
-    message = input("User : ")
 
-    response = ai.getResponse(message)
-    TextToSpeech(response).save_and_play()
+    # filename = r.record()
+    filename = "output_1692858036.wav"
+    transcript = SpeechToTextDao.transcribe_speech(filename)
+    print(f"recorded transcript input is :{transcript}")
+
+    response = ai.getResponse(transcript)
+    print(f"recieved ai response is :{response}")
+    tts = TextToSpeech(response)
+    tts.save_and_play()
+
+
+

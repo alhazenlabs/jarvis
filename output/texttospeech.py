@@ -28,9 +28,8 @@ class TextToSpeech(object):
             self.tts.save(file_path)
             session.commit()
         return file_path
-
-    def save_and_play(self):
-        file = self._save()
+    
+    def play(self, file):
         LOG.debug(f"loading and playing the speech file: {file}")
         self.mixer.music.load(file)
         self.mixer.music.play()
@@ -38,3 +37,6 @@ class TextToSpeech(object):
             time.sleep(1)
         LOG.debug(f"speech file was played successfully...")
 
+    def save_and_play(self):
+        file = self._save()
+        self.play(file)

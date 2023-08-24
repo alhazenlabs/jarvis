@@ -3,3 +3,5 @@ media/jarvis*
 **/__pycache__/ 
 ENV
 secrets.sh
+sync.sh
+speech-to-text-key.json
