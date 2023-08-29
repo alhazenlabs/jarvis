@@ -11,6 +11,10 @@ from utils.logger import LOG
 
 
 class Recorder(object):
+    """
+    A class for recording audio from a microphone using PyAudio and analyzing audio intensity.
+    """
+
     DEFAULT_SLEEP_SECONDS = 2
 
     DEFAULT_FRAMES_PER_BUFFER = Constants.DEFAULT_FRAMES_PER_BUFFER  # CHUNKS of bytes to read each time from mic
@@ -27,11 +31,6 @@ class Recorder(object):
     DEFAULT_SILENCE_LIMIT = 1  # Silence limit in seconds. The max ammount of seconds where
                                # only silence is recorded. When this time passes the
                                # recording finishes and the file is delivered.
-
-    DEFAULT_PREV_AUDIO = 0.5  # Previous audio (in seconds) to prepend. When noise
-                              # is detected, how much of previously recorded audio is
-                              # prepended. This helps to prevent chopping the beggining
-                              # of the phrase.
 
     DEFAULT_PERCENTAGE = 1 # Signifies 100%
 
@@ -68,12 +67,18 @@ class Recorder(object):
         self._pyaudio = pyaudio.PyAudio()
     
     def record(self, threshold=DEFAULT_THRESHOLD):
-
         """
-        Listens to Microphone, records in input and saves it to a wav file
+        Record audio from the microphone and save it to a WAV file. 
+        There is a default sleep of 2 seconds when the stream from microphone is accessed
+        This is to make sure that the program doesn't exits before the speaker starts speaking
+
+        Args:
+            threshold: The audio intensity threshold for speech detection.
+        Returns:
+            filename: The filename of the saved WAV file.
         """
 
-        LOG.info("* Listening mic. ")
+        LOG.info("* listening to microphone. ")
         stream = self._pyaudio.open(format=self.format, channels=self.channels, rate=self.rate,
                                     input=self.input,frames_per_buffer=self.frames_per_buffer)
         
@@ -85,15 +90,15 @@ class Recorder(object):
         time.sleep(self.DEFAULT_SLEEP_SECONDS) 
         # sleeping for 2 seconds to make sure the program doesn't exit before we have started speaking
 
-        LOG.info("Starting record of phrase")
+        LOG.info("starting record of phrase")
         while (self.speech_detected(window, threshold)):
             cur_data = stream.read(self.frames_per_buffer)
             window.append(self.get_rms(cur_data)) # Calculating RMS value of the current stream
             audio2send.extend(cur_data)
 
-        LOG.info("Done recording...")
+        LOG.info("done recording...")
         filename = self.save_speech(audio2send)
-        LOG.info(f"Saved file {filename}")
+        LOG.info(f"saved file {filename}")
         stream.close()
         self._pyaudio.terminate()
 
@@ -101,21 +106,47 @@ class Recorder(object):
     
     @staticmethod
     def speech_detected(window, threshold=DEFAULT_THRESHOLD):
+        """
+        Check if speech is detected based on the audio intensity window.
+
+        Args:
+            window: A deque containing recent audio intensity values.
+            threshold: The audio intensity threshold for speech detection.
+        Returns:
+            True if speech is detected, False otherwise.
+        """
         return sum([sound > threshold for sound in window]) > 0
     
     @staticmethod
     def get_rms(data, width=DEFAULT_WIDTH):
-        # LOG.debug(f"current data for reading the rms: {data}")
+        """
+        Calculate the Root Mean Square (RMS) value of audio data.
+
+        Args:
+            data: The audio data.
+            width: The width parameter specifying the number of bytes per sample.
+        Returns:
+            The RMS value of the audio data.
+        """
         return math.sqrt(abs(audioop.avg(data, width)))
 
     
     def avg_intensity(self, samples=DEFAULT_SAMPLE, percentage=DEFAULT_PERCENTAGE, stream=None):
-        """ 
-        Gets average audio intensity of your mic sound.
+        """
+        Calculate the average audio intensity of the microphone sound. 
+        This is a helper function to calculate the threshold of the speaker sound w.r.t the 
+        background. Once the threshold is identified, It can be updated in the constants.
+
+        Args:
+            samples: Number of audio samples to use for intensity calculation.
+            percentage: The percentage of top intensity values to consider.
+            stream: Optional audio stream. If not provided, a new stream will be opened.
+        Returns:
+            intensity: The average audio intensity.
         """
 
-        LOG.info("Getting intensity values from mic")
-        LOG.debug(f"Microphone info: {self._pyaudio.get_default_input_device_info()}")
+        LOG.info("getting intensity values from mic")
+        LOG.debug(f"microphone info: {self._pyaudio.get_default_input_device_info()}")
 
         if not stream:
             stream = self._pyaudio.open(format=self.format, channels=self.channels, rate=self.rate, 
@@ -126,19 +157,22 @@ class Recorder(object):
         values = sorted(values, reverse=True)
         intensity = sum(values[:int(samples * percentage)]) / int(samples * percentage) # Taking the average of top 20% of the sound intensity
 
-        LOG.info(f"Average audio intensity is:{intensity}")
+        LOG.info(f"average audio intensity is:{intensity}")
         stream.close()
     
         self._pyaudio.terminate()
         return intensity
     
     def save_speech(self, data):
-        """ 
-        Saves mic data to temporary WAV file. Returns filename of saved 
-        file 
+        """
+        Save recorded audio data to a temporary WAV file.
+
+        Args:
+            data: The audio data.
+        Returns:
+            filename: The filename of the saved WAV file.
         """
         filename = 'output_'+str(int(time.time()))
-        # writes data to WAV file
         wf = wave.open(filename + '.wav', 'wb')
         wf.setnchannels(self.DEFAULT_CHANNELS)
         wf.setsampwidth(self._pyaudio.get_sample_size(pyaudio.paInt16))
@@ -150,5 +184,4 @@ class Recorder(object):
 
 if __name__ == "__main__":
     r = Recorder()
-    # r.avg_intensity()
     r.record()
