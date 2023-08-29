@@ -1,6 +1,6 @@
 import os
 from audio_io.recorder import Recorder
-from audio_io.player import play_audio
+from audio_io.player import Player
 from data_api.speech_to_text_dao import SpeechToTextDao
 from data_api.ai_dao import AiDao
 from data_api.text_to_speech_dao import TextToSpeechDao
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     output_audio = TextToSpeechDao.synthesize(response)
     LOG.info(f"5. synthesized text to speech in file:{output_audio}")
 
-    play_audio(output_audio)
+    Player.play(output_audio)
     LOG.info(f"6. Audio successfully played:{output_audio}")
     # tts.save_and_play()
 

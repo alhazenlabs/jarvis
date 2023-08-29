@@ -4,29 +4,32 @@ from pydub.playback import play
 from utils.constants import Constants
 from utils.exceptions import UnsupportedExtenstion
 
-DEFAULT_RATE = Constants.DEFAULT_PLAYBACK_RATE
+class Player(object):
+    """
+    A class for playing audio files (mp3 or wav) with adjustable playback speed.
+    """
 
+    DEFAULT_RATE = Constants.DEFAULT_PLAYBACK_RATE
 
-def play_audio(filename, rate=DEFAULT_RATE):
-    print(filename, type(filename))
-    audio = ''
-    if '.mp3' in filename:
-        audio = AudioSegment.from_mp3(filename)
-    elif '.wav' in filename:
-        audio = AudioSegment.from_wav(filename)
-    else:
-        raise UnsupportedExtenstion(f"file {filename} extension not supported currently")
-    
-    audio = audio.speedup(playback_speed=rate)
-    play(audio)
+    @staticmethod
+    def play(filename, rate=DEFAULT_RATE):
+        """
+        Play an audio file (mp3 or wav) at the specified playback speed.
 
+        Args:
+            filename (str): The path to the audio file (mp3 or wav) to be played.
+            rate (float): The playback speed adjustment factor (default: 1.0).
 
-# if __name__ == "__main__":
-    # wav_filename = "your_audio.wav"
-    # mp3_filename = "your_audio.mp3"
-    # playback_rate = 1.5  # Change this to adjust the playback speed
-    
-    # play_wav_pyaudio(wav_filename, playback_rate)
-
-    # audio_player = play_audio("output_1692858036.wav", rate=1.2)
-    # audio_player = play_audio("media/standard/help.mp3", rate=1.2)
+        Raises:
+            UnsupportedExtenstion: If the file extension is not supported.
+        """
+        audio = ''
+        if '.mp3' in filename:
+            audio = AudioSegment.from_mp3(filename)
+        elif '.wav' in filename:
+            audio = AudioSegment.from_wav(filename)
+        else:
+            raise UnsupportedExtenstion(f"File {filename} extension not supported currently")
+        
+        audio = audio.speedup(playback_speed=rate)
+        play(audio)

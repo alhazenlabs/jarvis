@@ -1,67 +1,35 @@
-import time
 import unittest
-import threading
 from unittest.mock import Mock, patch
 
-from audio_io.player import Player
+from audio_io.player import Player, UnsupportedExtenstion
 
-class TestVariableRateAudioPlayer(unittest.TestCase):
+class TestPlayer(unittest.TestCase):
 
-    def setUp(self):
-        self.audio_player = Player("test_audio.wav", rate=1.5)
+    @patch("pydub.AudioSegment.from_mp3")
+    @patch("audio_io.player.play")
+    def test_play_mp3(self, mock_play, mock_from_mp3):
+        mock_audio = Mock()
+        mock_from_mp3.return_value = mock_audio
+        # mock_audio.return_value.speedup.return_value.sample_width = 4
 
-    @patch("pyaudio.PyAudio")
-    def test_play_and_stop(self, mock_pyaudio):
-        mock_pyaudio_instance = Mock()
-        mock_pyaudio.return_value = mock_pyaudio_instance
+        Player.play("audio.mp3", rate=1.5)
 
-        mock_stream_instance = Mock()
-        mock_pyaudio_instance.open.return_value = mock_stream_instance
-
-        mock_wf_instance = Mock()
-        mock_wf_instance.readframes.side_effect = [b"audio_data", None]
-        mock_wave_open = Mock(return_value=mock_wf_instance)
-        with patch("wave.open", mock_wave_open):
-            # Start playing the audio in a separate thread
-            audio_thread = threading.Thread(target=self.audio_player.play)
-            audio_thread.start()
-
-            # Let it play for a short time
-            time.sleep(1)
-
-            # Stop the audio playback
-            self.audio_player.stop()
-            audio_thread.join()
-
-            mock_pyaudio_instance.open.assert_called_once()
-            mock_stream_instance.stop_stream.assert_called_once()
-            mock_stream_instance.close.assert_called_once()
-            mock_wf_instance.readframes.assert_called()
+        mock_from_mp3.assert_called_once_with("audio.mp3")
+        mock_audio.speedup.assert_called_once_with(playback_speed=1.5)
+        mock_play.assert_called_once_with(mock_audio.speedup.return_value)
     
-    @patch("pyaudio.PyAudio")
-    def test_play_stopped_immediately(self, mock_pyaudio):
-        mock_pyaudio_instance = Mock()
-        mock_pyaudio.return_value = mock_pyaudio_instance
+    @patch("pydub.AudioSegment.from_wav")
+    @patch("audio_io.player.play")
+    def test_play_wav(self, mock_play, mock_from_wav):
+        mock_audio = Mock()
+        mock_from_wav.return_value = mock_audio
 
-        mock_stream_instance = Mock()
-        mock_pyaudio_instance.open.return_value = mock_stream_instance
+        Player.play("audio.wav", rate=2.0)
 
-        mock_wf_instance = Mock()
-        mock_wf_instance.readframes.return_value = None  # Simulate empty audio file
-        mock_wave_open = Mock(return_value=mock_wf_instance)
-        with patch("wave.open", mock_wave_open):
-            # Start playing the audio in a separate thread
-            audio_thread = threading.Thread(target=self.audio_player.play)
-            audio_thread.start()
+        mock_from_wav.assert_called_once_with("audio.wav")
+        mock_audio.speedup.assert_called_once_with(playback_speed=2.0)
+        mock_play.assert_called_once_with(mock_audio.speedup.return_value)
 
-            # Stop the audio playback immediately
-            self.audio_player.stop()
-            audio_thread.join()
-
-            mock_pyaudio_instance.open.assert_called_once()
-            mock_stream_instance.stop_stream.assert_not_called()
-            mock_stream_instance.close.assert_not_called()
-            mock_wf_instance.readframes.assert_called()
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_play_unsupported_extension(self):
+        with self.assertRaises(UnsupportedExtenstion):
+            Player.play("audio.unknown")
