@@ -5,13 +5,15 @@ import audioop
 import wave
 
 from collections import deque
+
+from utils.constants import Constants
 from utils.logger import LOG
 
 
 class Recorder(object):
     DEFAULT_SLEEP_SECONDS = 2
 
-    DEFAULT_FRAMES_PER_BUFFER = 1024  # CHUNKS of bytes to read each time from mic
+    DEFAULT_FRAMES_PER_BUFFER = Constants.DEFAULT_FRAMES_PER_BUFFER  # CHUNKS of bytes to read each time from mic
     DEFAULT_FORMAT = pyaudio.paInt16
     DEFAULT_WIDTH = 4 # Width parameter specifies the number of bytes used 
                       # for a audio sample, (4 = 32 bit) will provide higher variations

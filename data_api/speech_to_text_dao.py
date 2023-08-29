@@ -5,13 +5,15 @@ A module providing data access methods for transcribing speech using the Google 
 from google.cloud import speech_v1p1beta1 as speech
 import io
 
+from utils.constants import Constants
+
 class SpeechToTextDao(object):
     """
     A class providing methods for transcribing speech using the Google Cloud Speech-to-Text API.
     """
 
-    INPUT_LANGUAGE_CODE = "en-IN"
-    DEFAULT_RATE = 16000
+    INPUT_LANGUAGE_CODE = Constants.DEFAULT_INPUT_LANGUAGE_CODE
+    DEFAULT_RATE = Constants.DEFAULT_RATE
 
     @classmethod
     def transcribe_speech(cls, speech_file_path):

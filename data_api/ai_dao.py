@@ -61,7 +61,7 @@ class AiDao(object):
         """
         with terminating_sn() as session:
             if not self.last_message_index and not self.context:
-                PromptDao.addPrompt(session,
+                PromptDao.add_prompt(session,
                                     self.messages[self.last_message_index]["role"],
                                     self.messages[self.last_message_index]["content"],
                                     self.messages[self.last_message_index]["content"])
@@ -69,7 +69,7 @@ class AiDao(object):
                 self.last_message_index += 1
 
             for index in range(self.last_message_index, len(self.messages)):
-                PromptDao.addPrompt(session,
+                PromptDao.add_prompt(session,
                                     self.messages[index]["role"],
                                     self.context,
                                     self.messages[index]["content"])

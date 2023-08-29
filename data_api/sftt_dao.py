@@ -4,6 +4,7 @@ A module providing data access methods for the SpeechFileToText model.
 
 from data_api.models import SpeechFileToText
 
+
 class SfttDao(object):
     """
     A class providing data access methods for the SpeechFileToText model.
@@ -25,6 +26,7 @@ class SfttDao(object):
         sftt = SpeechFileToText(text, is_input)
         session.add(sftt)
         session.flush()
+        
         return sftt
 
     @staticmethod
