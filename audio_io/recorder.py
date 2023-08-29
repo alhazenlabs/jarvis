@@ -7,6 +7,7 @@ import wave
 from collections import deque
 
 from utils.constants import Constants
+from utils.exceptions import MicrophoneError
 from utils.logger import LOG
 
 
@@ -15,24 +16,25 @@ class Recorder(object):
     A class for recording audio from a microphone using PyAudio and analyzing audio intensity.
     """
 
-    DEFAULT_SLEEP_SECONDS = 2
+    DEFAULT_SLEEP_SECONDS = Constants.DEFAULT_INPUT_SLEEP_SECONDS
 
     DEFAULT_FRAMES_PER_BUFFER = Constants.DEFAULT_FRAMES_PER_BUFFER  # CHUNKS of bytes to read each time from mic
     DEFAULT_FORMAT = pyaudio.paInt16
-    DEFAULT_WIDTH = 4 # Width parameter specifies the number of bytes used 
-                      # for a audio sample, (4 = 32 bit) will provide higher variations
-    DEFAULT_CHANNELS = 1
-    DEFAULT_RATE = 16000
-    DEFAULT_THRESHOLD = 500
+    DEFAULT_WIDTH = Constants.DEFAULT_INPUT_AUDIO_WIDTH # Width parameter specifies the number of bytes used 
+                                                        # for a audio sample, (4 = 32 bit) will provide higher variations in threshold
+    DEFAULT_CHANNELS = Constants.DEFAULT_INPUT_CHANNELS
+    DEFAULT_RATE = Constants.DEFAULT_RATE
+    DEFAULT_THRESHOLD = Constants.DEFAULT_INPUT_SPEECH_THRESHOLD # Threshold to signify silence, 
+                                                                 # this needs to be calibrated after measuring avg_intensity from a mic
     DEFAULT_INPUT = True # True is for recording the sound
 
-    DEFAULT_SAMPLE = 50 # Number of samples for measuring audio intensity
+    DEFAULT_SAMPLE = Constants.DEFAULT_INPUT_SAMPLES # Number of samples for measuring audio intensity
 
-    DEFAULT_SILENCE_LIMIT = 1  # Silence limit in seconds. The max ammount of seconds where
-                               # only silence is recorded. When this time passes the
-                               # recording finishes and the file is delivered.
+    DEFAULT_SILENCE_LIMIT = Constants.DEFAULT_SILENCE_LIMIT # Silence limit in seconds. The max ammount of seconds where
+                                                            # only silence is recorded. When this time passes the
+                                                            # recording finishes and the file is delivered.
 
-    DEFAULT_PERCENTAGE = 1 # Signifies 100%
+    DEFAULT_PERCENTAGE = Constants.DEFAULT_PERCENTAGE # Percentage of audio to be included while calculating threshold
 
     def __init__(self, format=DEFAULT_FORMAT, channels=DEFAULT_CHANNELS, rate=DEFAULT_RATE, 
                  input=DEFAULT_INPUT, frames_per_buffer=DEFAULT_FRAMES_PER_BUFFER):
@@ -79,8 +81,12 @@ class Recorder(object):
         """
 
         LOG.info("* listening to microphone. ")
-        stream = self._pyaudio.open(format=self.format, channels=self.channels, rate=self.rate,
-                                    input=self.input,frames_per_buffer=self.frames_per_buffer)
+        try:
+            stream = self._pyaudio.open(format=self.format, channels=self.channels, rate=self.rate,
+                                        input=self.input,frames_per_buffer=self.frames_per_buffer)
+        except Exception as e:
+            LOG.exception(f"exception occurred while listening to the microphone: e")
+            raise MicrophoneError("unable to open listen to microphone")
         
         buffers = self.rate // self.frames_per_buffer
         window = deque(maxlen=self.DEFAULT_SILENCE_LIMIT * buffers) # when all the samples in the window falls below threshold, we can assume a silence 
@@ -181,7 +187,3 @@ class Recorder(object):
         wf.close()
         return filename + '.wav'
     
-
-if __name__ == "__main__":
-    r = Recorder()
-    r.record()

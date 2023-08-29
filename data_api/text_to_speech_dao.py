@@ -30,5 +30,3 @@ class TextToSpeechDao(object):
 
         return file_path
     
-if __name__ == "__main__":
-    t = TextToSpeechDao.synthesize("Sorry, i am having trouble connecting to the servers. Please try again later")

@@ -1,11 +1,12 @@
 """
 A module providing data access methods for transcribing speech using the Google Cloud Speech-to-Text API.
 """
-
-from google.cloud import speech_v1p1beta1 as speech
 import io
+from google.cloud import speech_v1p1beta1 as speech
 
 from utils.constants import Constants
+from utils.exceptions import SttError
+from utils.logger import LOG
 
 class SpeechToTextDao(object):
     """
@@ -39,7 +40,11 @@ class SpeechToTextDao(object):
             language_code=cls.INPUT_LANGUAGE_CODE,
         )
 
-        response = client.recognize(config=config, audio=audio)
+        try:
+            response = client.recognize(config=config, audio=audio)
+        except Exception as e:
+            LOG.exception(f"exception occurred while transcribing audio: {e}")
+            raise SttError("transcription of input audio failed")
 
         highest_confidence_result = ''
         highest_confidence = 0

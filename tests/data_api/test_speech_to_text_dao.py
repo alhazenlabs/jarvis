@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest.mock import Mock, patch
 
-from input.recorder import Recorder
+from audio_io.recorder import Recorder
 from data_api.speech_to_text_dao import SpeechToTextDao
 
 class TestSpeechToTextDao(unittest.TestCase):

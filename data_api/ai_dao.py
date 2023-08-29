@@ -6,8 +6,10 @@ import openai
 
 from data_api.prompt_dao import PromptDao
 from utils.constants import Constants
-from utils.logger import LOG
 from utils.db import terminating_sn
+from utils.exceptions import AiError, DbError
+from utils.logger import LOG
+
 
 openai.api_key = Constants.API_KEY
 
@@ -46,7 +48,12 @@ class AiDao(object):
         self.messages.append({"role": "user", "content": message})
         LOG.debug(f"sending the messages to AI as {self.messages}")
 
-        chat = openai.ChatCompletion.create(model=self.model, messages=self.messages)
+        try:
+            chat = openai.ChatCompletion.create(model=self.model, messages=self.messages)
+        except Exception as e:
+            LOG.exception(f"exception occured during Open AI request: {e}")
+            raise AiError(f"failed during the Open AI request")
+        
         LOG.debug(f"received chat object is: {chat}")
 
         reply = chat.choices[0].message.content
@@ -59,23 +66,27 @@ class AiDao(object):
         """
         Adds user and assistant responses to the database.
         """
-        with terminating_sn() as session:
-            if not self.last_message_index and not self.context:
-                PromptDao.add_prompt(session,
-                                    self.messages[self.last_message_index]["role"],
-                                    self.messages[self.last_message_index]["content"],
-                                    self.messages[self.last_message_index]["content"])
-                self.context = self.messages[self.last_message_index]["content"]
-                self.last_message_index += 1
+        try:
+            with terminating_sn() as session:
+                if not self.last_message_index and not self.context:
+                    PromptDao.add_prompt(session,
+                                        self.messages[self.last_message_index]["role"],
+                                        self.messages[self.last_message_index]["content"],
+                                        self.messages[self.last_message_index]["content"])
+                    self.context = self.messages[self.last_message_index]["content"]
+                    self.last_message_index += 1
 
-            for index in range(self.last_message_index, len(self.messages)):
-                PromptDao.add_prompt(session,
-                                    self.messages[index]["role"],
-                                    self.context,
-                                    self.messages[index]["content"])
-                self.last_message_index += 1
+                for index in range(self.last_message_index, len(self.messages)):
+                    PromptDao.add_prompt(session,
+                                        self.messages[index]["role"],
+                                        self.context,
+                                        self.messages[index]["content"])
+                    self.last_message_index += 1
 
-            session.commit()
+                session.commit()
+        except Exception as e:
+            LOG.exception(f"error occurred while writing to the database: {e}")
+            raise DbError(f"error occurred during write")
     
     def get_and_save_response(self, message):
         """
@@ -90,4 +101,3 @@ class AiDao(object):
         response = self._get_response(message)
         self._save_responses()
         return response
-
