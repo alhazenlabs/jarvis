@@ -8,14 +8,23 @@ def get_openai_key():
     
     return key
 
+def get_porcupine_access_key():
+    key = os.environ.get("PICOVOICE_KEY")
+
+    if not key:
+        raise KeyError("missing porcupine access key, signup on https://console.picovoice.ai/, and update PICOVOICE_KEY env varaible")
+
+    return key
+
 def get_input_speech_threshold():
     # TODO make this function such that it calculates the speech threshold on the fly
-    threshold = int(os.environ.get("DEFAULT_INPUT_SPEECH_THRESHOLD", 500))
+    threshold = int(os.environ.get("DEFAULT_INPUT_SPEECH_THRESHOLD", 600))
     return threshold
 
 class Constants(object):
     API_KEY = get_openai_key()
     DEFAULT_INPUT_SPEECH_THRESHOLD = get_input_speech_threshold()
+    PORCUPINE_ACCESS_KEY = get_porcupine_access_key()
 
     # AI CONSTANTS
     DEFAULT_MODEL = "gpt-3.5-turbo"
@@ -23,6 +32,10 @@ class Constants(object):
 
     # MEDIA OUTPUT CONSTANTS
     MEDIA_FOLDER = "media/"
+
+    # WAKE CONSTANTS
+    DEFAULT_WAKE_KEYWORDS = ['jarvis']
+    DEFAULT_WAKE_SENSITIVITIES = [0.5]
 
     # RECORDER CONSTANTS
     DEFAULT_INPUT_SLEEP_SECONDS = 2

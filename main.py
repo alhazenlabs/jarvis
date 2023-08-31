@@ -23,21 +23,21 @@ if __name__ == "__main__":
     LOG.info(f"1. Recorded the audio for transcription file:{filename}")
     # filename = "output_1692858036.wav"
 
-    transcript = SpeechToTextDao.transcribe_speech(filename)
-    LOG.info(f"2. recorded transcript input is :{transcript}")
+    # transcript = SpeechToTextDao.transcribe_speech(filename)
+    # LOG.info(f"2. recorded transcript input is :{transcript}")
 
-    file = mapInputSpeechToText(transcript, filename)
-    LOG.info(f"3. mapped input speech to text {file}")
-    os.remove(filename)
+    # file = mapInputSpeechToText(transcript, filename)
+    # LOG.info(f"3. mapped input speech to text {file}")
+    # os.remove(filename)
 
-    response = ai.get_and_save_response(transcript)
-    LOG.info(f"4. recieved ai response is :{response}")
+    # response = ai.get_and_save_response(transcript)
+    # LOG.info(f"4. recieved ai response is :{response}")
 
-    output_audio = TextToSpeechDao.synthesize(response)
-    LOG.info(f"5. synthesized text to speech in file:{output_audio}")
+    # output_audio = TextToSpeechDao.synthesize(response)
+    # LOG.info(f"5. synthesized text to speech in file:{output_audio}")
 
-    Player.play(output_audio)
-    LOG.info(f"6. Audio successfully played:{output_audio}")
+    # Player.play(output_audio)
+    # LOG.info(f"6. Audio successfully played:{output_audio}")
     # tts.save_and_play()
 
 

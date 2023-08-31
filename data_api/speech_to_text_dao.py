@@ -15,6 +15,7 @@ class SpeechToTextDao(object):
 
     INPUT_LANGUAGE_CODE = Constants.DEFAULT_INPUT_LANGUAGE_CODE
     DEFAULT_RATE = Constants.DEFAULT_RATE
+    DEFAULT_WAKE_WORDS = Constants.DEFAULT_WAKE_KEYWORDS
 
     @classmethod
     def transcribe_speech(cls, speech_file_path):
@@ -59,4 +60,22 @@ class SpeechToTextDao(object):
                 highest_confidence_result = transcript
                 highest_confidence = confidence
 
-        return highest_confidence_result
+        return cls.remove_wake_word(highest_confidence_result)
+
+    @classmethod
+    def remove_wake_word(cls, sentence):
+        for word in cls.DEFAULT_WAKE_WORDS:
+            temp_sentence = cls.get_sentence_after(word, sentence)
+
+            if len(temp_sentence) < len(sentence):
+                sentence = temp_sentence
+
+        return temp_sentence
+    
+    @staticmethod
+    def get_sentence_after(word, sentence):
+        for index in range(len(sentence) - len(word)):
+            if word.lower() == sentence[index: index + len(word)].lower():
+                return sentence[index + len(word):]
+        
+        return sentence

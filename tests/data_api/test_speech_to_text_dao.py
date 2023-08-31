@@ -31,5 +31,17 @@ class TestSpeechToTextDao(unittest.TestCase):
 
         os.remove(file)
 
+    def test_remove_wake_word(self):
+        sentence1 = "Hey Jarvis, How are you doing today"
+        sentence2 = "Hey JARVIS, How are you doing today"
+        sentence3 = "Hey Alexa, How are you doing today"
+
+        answer = ", How are you doing today"
+
+        self.assertEqual(answer, SpeechToTextDao.remove_wake_word(sentence1))
+        self.assertEqual(answer, SpeechToTextDao.remove_wake_word(sentence2))
+        self.assertEqual(sentence3, SpeechToTextDao.remove_wake_word(sentence3))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -5,3 +5,4 @@ ENV
 secrets.sh
 sync.sh
 speech-to-text-key.json
+snowboy/
