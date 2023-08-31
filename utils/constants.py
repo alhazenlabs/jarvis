@@ -48,7 +48,7 @@ class Constants(object):
                          # or played back per second. Common sample rates include 44100 Hz (CD quality)
                          # and 48000 Hz. Higher sample rates allow the capture of higher-frequency audio
                          # but also require more data
-    DEFAULT_FRAMES_PER_BUFFER = 1024
+    DEFAULT_FRAMES_PER_BUFFER = 512
     DEFAULT_INPUT_SAMPLES = 50 # This number of samples will be used to calculate the avg intensity of the mic to measure speech threshold
     DEFAULT_SILENCE_LIMIT = 1
     DEFAULT_PERCENTAGE = 1 # 100 %

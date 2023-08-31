@@ -18,7 +18,7 @@ class Recorder(object):
 
     DEFAULT_SLEEP_SECONDS = Constants.DEFAULT_INPUT_SLEEP_SECONDS
 
-    DEFAULT_FRAMES_PER_BUFFER = Constants.DEFAULT_FRAMES_PER_BUFFER  # CHUNKS of bytes to read each time from mic
+    DEFAULT_FRAMES_PER_BUFFER = Constants.DEFAULT_FRAMES_PER_BUFFER  # CHUNKS of bytes to read each time from mic  
     DEFAULT_FORMAT = pyaudio.paInt16
     DEFAULT_WIDTH = Constants.DEFAULT_INPUT_AUDIO_WIDTH # Width parameter specifies the number of bytes used 
                                                         # for a audio sample, (4 = 32 bit) will provide higher variations in threshold
@@ -35,6 +35,7 @@ class Recorder(object):
                                                             # recording finishes and the file is delivered.
 
     DEFAULT_PERCENTAGE = Constants.DEFAULT_PERCENTAGE # Percentage of audio to be included while calculating threshold
+    MAX_BUFFER_SIZE = 15
 
     def __init__(self, format=DEFAULT_FORMAT, channels=DEFAULT_CHANNELS, rate=DEFAULT_RATE, 
                  input=DEFAULT_INPUT, frames_per_buffer=DEFAULT_FRAMES_PER_BUFFER):
@@ -88,7 +89,7 @@ class Recorder(object):
             LOG.exception(f"exception occurred while listening to the microphone: e")
             raise MicrophoneError("unable to open listen to microphone")
         
-        buffers = self.rate // self.frames_per_buffer
+        buffers = min(self.rate // self.frames_per_buffer, self.MAX_BUFFER_SIZE)
         window = deque(maxlen=self.DEFAULT_SILENCE_LIMIT * buffers) # when all the samples in the window falls below threshold, we can assume a silence 
         window.append(threshold + 1)
         audio2send = bytearray()

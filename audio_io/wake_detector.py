@@ -27,7 +27,7 @@ class WakeDetector(object):
 
     @classmethod
     def detect(cls, frames):
-        pcm = struct.unpack_from("h" * pa_frames_per_buffer, frames)
+        pcm = struct.unpack_from("h" * cls.DEFAULT_FRAMES_PER_BUFFER, frames)
         keyword_index = cls.PC.process(pcm)
         return keyword_index >= 0
 
