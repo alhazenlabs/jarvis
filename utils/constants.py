@@ -64,3 +64,4 @@ class Constants(object):
 
     # ERROR
     CONSTANT_SERVER_ERROR = "server_error"
+    CONSTANT_SPEECH_ERROR = "speech_error"

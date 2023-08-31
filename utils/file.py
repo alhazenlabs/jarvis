@@ -11,11 +11,7 @@ from utils.exceptions import UnsupportedExtenstion
 
 DIRECTORY = Constants.MEDIA_FOLDER + "shard{}/"
 SHARD_LENGTH = 2000
-STANDARD_MEDIA_DIRECTORY = "media/standard"
-
-ERROR_TO_PRESET = {
-    Constants.CONSTANT_SERVER_ERROR : STANDARD_MEDIA_DIRECTORY + Constants.DEFAULT_OUTPUT_FILE_FORMAT.format(Constants.CONSTANT_SERVER_ERROR)
-    }
+STANDARD_MEDIA_DIRECTORY = "media/standard/"
 
 def generateSpeechFileName(session, text, is_input=0):
     # is_input is the parameter to denote if the speech is user generated(1) or system generated(0)
@@ -32,7 +28,7 @@ def getDirectoryforSpeechSave(id):
     return output_dir
 
 def error_response(code):
-    return ERROR_TO_PRESET[code]
+    return STANDARD_MEDIA_DIRECTORY + Constants.DEFAULT_OUTPUT_FILE_FORMAT.format(code)
 
 def mapInputSpeechToText(text, temp_file):
     

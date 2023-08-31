@@ -64,6 +64,9 @@ class SpeechToTextDao(object):
 
     @classmethod
     def remove_wake_word(cls, sentence):
+        if not sentence:
+            raise SttError("transcribed sentence is empty")
+
         for word in cls.DEFAULT_WAKE_WORDS:
             temp_sentence = cls.get_sentence_after(word, sentence)
 

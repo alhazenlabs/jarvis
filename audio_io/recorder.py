@@ -67,7 +67,7 @@ class Recorder(object):
         self.input = input
         self.frames_per_buffer = frames_per_buffer
 
-        self._pyaudio = pyaudio.PyAudio()
+        # self._pyaudio = pyaudio.PyAudio()
     
     def record(self, threshold=DEFAULT_THRESHOLD):
         """
@@ -110,6 +110,49 @@ class Recorder(object):
         self._pyaudio.terminate()
 
         return filename
+    
+    def record_and_save(self, stream, width, last_frame=None, threshold=DEFAULT_THRESHOLD):
+        buffers = min(self.rate // self.frames_per_buffer, self.MAX_BUFFER_SIZE)
+        window = deque(maxlen=self.DEFAULT_SILENCE_LIMIT * buffers) # when all the samples in the window falls below threshold, we can assume a silence 
+        window.append(threshold + 1)
+
+        audio2send = bytearray()
+        if last_frame:
+            LOG.info(f"last frame was {last_frame}")
+            audio2send.extend(last_frame)
+
+        # time.sleep(self.DEFAULT_SLEEP_SECONDS) # this line is causing the streams to go away when we start the stream and sleep for 2 seconds
+        # sleeping for 2 seconds to make sure the program doesn't exit before we have started speaking
+        LOG.info("starting record of phrase")
+        while (self.speech_detected(window, threshold)):
+            cur_data = stream.read(self.frames_per_buffer)
+            window.append(self.get_rms(cur_data)) # Calculating RMS value of the current stream
+            LOG.info(f"current window: {window}")
+            audio2send.extend(cur_data)
+
+        LOG.info("done recording...")
+        filename = self.save_speech_new(audio2send, width)
+        LOG.info(f"saved file {filename}")
+        return filename
+    
+    def save_speech_new(self, data, width):
+        """
+        Save recorded audio data to a temporary WAV file.
+
+        Args:
+            data: The audio data.
+        Returns:
+            filename: The filename of the saved WAV file.
+        """
+        filename = 'output_'+str(int(time.time()))
+        wf = wave.open(filename + '.wav', 'wb')
+        wf.setnchannels(self.DEFAULT_CHANNELS)
+        wf.setsampwidth(width)
+        wf.setframerate(self.DEFAULT_RATE)
+        wf.writeframes(data)
+        wf.close()
+        return filename + '.wav'
+
     
     @staticmethod
     def speech_detected(window, threshold=DEFAULT_THRESHOLD):
