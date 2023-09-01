@@ -34,8 +34,8 @@ class Constants(object):
     MEDIA_FOLDER = "media/"
 
     # WAKE CONSTANTS
-    DEFAULT_WAKE_KEYWORDS = ['jarvis']
-    DEFAULT_WAKE_SENSITIVITIES = [0.5]
+    DEFAULT_WAKE_KEYWORDS = ['jarvis', 'alexa']
+    DEFAULT_WAKE_SENSITIVITIES = [1, 1]
 
     # RECORDER CONSTANTS
     DEFAULT_INPUT_SLEEP_SECONDS = 2
@@ -43,7 +43,7 @@ class Constants(object):
     DEFAULT_INPUT_CHANNELS = 1 # Signifies number of channels on the microphone, using 2 channels(stereo) 
                                # will cause a sound sample to be represent in 2 dimension, requiring more memory
     
-    DEFAULT_INPUT_LANGUAGE_CODE = "en-IN"
+    DEFAULT_INPUT_LANGUAGE_CODE = "en-US"
     DEFAULT_RATE = 16000 # Sample rate of the audio stream. Defines the number of audio samples recorded
                          # or played back per second. Common sample rates include 44100 Hz (CD quality)
                          # and 48000 Hz. Higher sample rates allow the capture of higher-frequency audio

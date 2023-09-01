@@ -110,16 +110,19 @@ class Recorder(object):
         self._pyaudio.terminate()
 
         return filename
+
     
-    def record_and_save(self, stream, width, last_frame=None, threshold=DEFAULT_THRESHOLD):
+    def record_and_save(self, stream, width, prepend_audio=None, threshold=DEFAULT_THRESHOLD):
         buffers = min(self.rate // self.frames_per_buffer, self.MAX_BUFFER_SIZE)
         window = deque(maxlen=self.DEFAULT_SILENCE_LIMIT * buffers) # when all the samples in the window falls below threshold, we can assume a silence 
+        append_audio = window.copy()
         window.append(threshold + 1)
 
         audio2send = bytearray()
-        if last_frame:
-            LOG.info(f"last frame was {last_frame}")
-            audio2send.extend(last_frame)
+        while prepend_audio:
+            pd = prepend_audio.popleft()
+            LOG.info(f"starting frame length {len(pd)}")
+            audio2send.extend(pd)
 
         # time.sleep(self.DEFAULT_SLEEP_SECONDS) # this line is causing the streams to go away when we start the stream and sleep for 2 seconds
         # sleeping for 2 seconds to make sure the program doesn't exit before we have started speaking
@@ -127,8 +130,14 @@ class Recorder(object):
         while (self.speech_detected(window, threshold)):
             cur_data = stream.read(self.frames_per_buffer)
             window.append(self.get_rms(cur_data)) # Calculating RMS value of the current stream
-            LOG.info(f"current window: {window}")
+            LOG.info(f"current frame length: {len(cur_data)}")
+            append_audio.append(cur_data)
             audio2send.extend(cur_data)
+
+        while append_audio:
+            ad = append_audio.pop()
+            LOG.info(f"ending frame length {len(ad)}")
+            audio2send.extend(ad)
 
         LOG.info("done recording...")
         filename = self.save_speech_new(audio2send, width)

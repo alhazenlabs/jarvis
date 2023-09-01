@@ -39,15 +39,21 @@ if __name__== "__main__":
         input=True,
         frames_per_buffer=pa_frames_per_buffer,
     )
+    prepend_audio = deque(maxlen=7)
 
     try:
         while True:
             frame = audio_stream.read(pa_frames_per_buffer)
-            if WakeDetector.detect(frame[:]):  # after detecting the wake word, the last frame misses the wake audio, 
+
+            prepend_audio.append(frame)
+            if WakeDetector.detect(frame):  # after detecting the wake word, the last frame misses the wake audio, 
                                                # possibility is that porcupine is modifying it, check
                 print("jarvis detected")
+                LOG.info(f"frame length of wake detection {len(frame)}")
+
+
                 LOG.info("0. Begin")
-                filename = r.record_and_save(audio_stream, pa.get_sample_size(pyaudio.paInt16), frame)
+                filename = r.record_and_save(audio_stream, pa.get_sample_size(pyaudio.paInt16), prepend_audio)
                 LOG.info(f"1. Recorded the audio for transcription file:{filename}")
 
                 try:
