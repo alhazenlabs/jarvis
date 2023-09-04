@@ -14,36 +14,27 @@ from utils.file import mapInputSpeechToText, error_response
 from utils.exceptions import SttError
 
 
-# Parameters for PyAudio
-pa = None
-audio_stream = None
-pa_format = pyaudio.paInt16
-pa_channels = Constants.DEFAULT_INPUT_CHANNELS
-pa_rate = Constants.DEFAULT_RATE
-pa_frames_per_buffer = Constants.DEFAULT_FRAMES_PER_BUFFER
-
-if __name__== "__main__":
+def callable():
     load_db()
     r = Recorder()
     ai = AiDao()
-
-    print("Listening... Press Ctrl+C to exit")
-
     pa = pyaudio.PyAudio()
 
     # Open audio stream
     audio_stream = pa.open(
-        rate=pa_rate,
-        channels=pa_channels,
-        format=pa_format,
+        rate=Constants.DEFAULT_RATE,
+        channels=Constants.DEFAULT_INPUT_CHANNELS,
+        format=pyaudio.paInt16,
         input=True,
-        frames_per_buffer=pa_frames_per_buffer,
+        frames_per_buffer=Constants.DEFAULT_FRAMES_PER_BUFFER,
     )
-    prepend_audio = deque(maxlen=7)
 
+    prepend_audio = deque(maxlen=min(Constants.DEFAULT_RATE // Constants.DEFAULT_FRAMES_PER_BUFFER, 7))
+    
+    print("Listening... Press Ctrl+C to exit")
     try:
         while True:
-            frame = audio_stream.read(pa_frames_per_buffer)
+            frame = audio_stream.read(Constants.DEFAULT_FRAMES_PER_BUFFER)
 
             prepend_audio.append(frame)
             if WakeDetector.detect(frame):  # after detecting the wake word, the last frame misses the wake audio, 
@@ -62,7 +53,6 @@ if __name__== "__main__":
 
                     file = mapInputSpeechToText(transcript, filename)
                     LOG.info(f"3. mapped input speech to text {file}")
-                    os.remove(filename)
 
                     response = ai.get_and_save_response(transcript)
                     LOG.info(f"4. recieved ai response is :{response}")
@@ -71,7 +61,8 @@ if __name__== "__main__":
                     LOG.info(f"5. synthesized text to speech in file:{output_audio}")
                 except SttError:
                     output_audio = error_response(Constants.CONSTANT_SPEECH_ERROR)
-
+                
+                os.remove(filename)
                 Player.play(output_audio)
 
     except KeyboardInterrupt:
@@ -81,3 +72,6 @@ if __name__== "__main__":
             audio_stream.close()
         if pa is not None:
             pa.terminate()
+
+if __name__== "__main__":
+    callable()
