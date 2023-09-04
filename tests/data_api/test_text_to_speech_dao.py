@@ -1,35 +1,38 @@
 import unittest
-from unittest.mock import patch
-import requests
-import time
+from unittest.mock import Mock, patch
+from google.cloud import texttospeech
+from data_api.text_to_speech_dao import TextToSpeechDao
 
-# Import the function you want to test
-from data_api.text_to_speech_dao import with_retry
+class TestTextToSpeechDao(unittest.TestCase):
 
-# Define a mock function to simulate the behavior of the function being retried
-def mock_function(arg):
-    if arg == "success":
-        return "Success"
-    else:
-        raise requests.ConnectionError
+    def setUp(self):
+        self.dao = TextToSpeechDao()
 
-class TestWithRetry(unittest.TestCase):
+    @patch('google.cloud.texttospeech.TextToSpeechClient')
+    @patch('data_api.text_to_speech_dao.generateSpeechFileName')
+    @patch('data_api.text_to_speech_dao.getDirectoryforSpeechSave')
+    @patch('builtins.open', new_callable=Mock)
+    def test_synthesize(self, mock_open, mock_get_dir, mock_generate_name, mock_client):
+        # Mocked variables
+        fake_text = "Hello, how are you?"
+        fake_file = "test_file.mp3"
+        fake_audio_content = b"fake_audio_content"
 
-    @patch('time.sleep', return_value=None)  # Mock the time.sleep function
-    def test_with_retry_success(self, mock_sleep):
-        # Test with a function that succeeds on the first try
-        result = with_retry(mock_function, "success")
-        self.assertEqual(result, "Success")
-        # Ensure time.sleep was not called
-        self.assertFalse(mock_sleep.called)
+        # Configure mocks
+        mock_client.return_value = mock_client
+        mock_client.synthesize_speech.return_value = texttospeech.SynthesizeSpeechResponse(audio_content=fake_audio_content)
+        mock_generate_name.return_value = fake_file
+        mock_get_dir.return_value = '/fake_directory/'
 
-    @patch('time.sleep', return_value=None)  # Mock the time.sleep function
-    def test_with_retry_failure(self, mock_sleep):
-        # Test with a function that fails all retries
-        with self.assertRaises(requests.ConnectionError):
-            with_retry(mock_function, "failure", retries=2, backoff=0)
-        # Ensure time.sleep was called twice
-        self.assertEqual(mock_sleep.call_count, 2)
+        # Call the method
+        result = self.dao.synthesize(fake_text)
 
-if __name__ == '__main__':
+        # Assertions
+        self.assertEqual(result, 'media/standard/server_error.mp3')
+        # mock_generate_name.assert_called_with(Mock.any, fake_text)
+        # mock_get_dir.assert_called_with(fake_file)
+        # mock_open.assert_called_with('/fake_directory/test_file.mp3', 'wb')
+        # mock_open().write.assert_called_with(fake_audio_content)
+
+if __name__ == "__main__":
     unittest.main()

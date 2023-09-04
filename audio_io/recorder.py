@@ -66,8 +66,6 @@ class Recorder(object):
         self.rate = rate
         self.input = input
         self.frames_per_buffer = frames_per_buffer
-
-        # self._pyaudio = pyaudio.PyAudio()
     
     def record(self, threshold=DEFAULT_THRESHOLD):
         """
@@ -80,39 +78,39 @@ class Recorder(object):
         Returns:
             filename: The filename of the saved WAV file.
         """
-
+        
+        pa = pyaudio.PyAudio()
         LOG.info("* listening to microphone. ")
         try:
-            stream = self._pyaudio.open(format=self.format, channels=self.channels, rate=self.rate,
-                                        input=self.input,frames_per_buffer=self.frames_per_buffer)
+            stream = pa.open(format=self.format, channels=self.channels, rate=self.rate,
+                                        input=self.input, frames_per_buffer=self.frames_per_buffer)
         except Exception as e:
             LOG.exception(f"exception occurred while listening to the microphone: e")
             raise MicrophoneError("unable to open listen to microphone")
         
-        buffers = min(self.rate // self.frames_per_buffer, self.MAX_BUFFER_SIZE)
-        window = deque(maxlen=self.DEFAULT_SILENCE_LIMIT * buffers) # when all the samples in the window falls below threshold, we can assume a silence 
-        window.append(threshold + 1)
-        audio2send = bytearray()
 
         time.sleep(self.DEFAULT_SLEEP_SECONDS) 
         # sleeping for 2 seconds to make sure the program doesn't exit before we have started speaking
+        filename = self.record_and_save(stream, pa.get_sample_size(self.format), threshold=threshold)
 
-        LOG.info("starting record of phrase")
-        while (self.speech_detected(window, threshold)):
-            cur_data = stream.read(self.frames_per_buffer)
-            window.append(self.get_rms(cur_data)) # Calculating RMS value of the current stream
-            audio2send.extend(cur_data)
-
-        LOG.info("done recording...")
-        filename = self.save_speech(audio2send)
-        LOG.info(f"saved file {filename}")
         stream.close()
-        self._pyaudio.terminate()
+        pa.terminate()
 
         return filename
 
-    
     def record_and_save(self, stream, width, prepend_audio=None, threshold=DEFAULT_THRESHOLD):
+        """
+        Record audio from a microphone stream and save it to a WAV file.
+
+        Args:
+            stream: The PyAudio microphone stream.
+            width: The sample width in bytes.
+            prepend_audio: Optional audio to prepend to the recorded audio.
+            threshold (int): The audio intensity threshold for speech detection.
+
+        Returns:
+            filename (str): The filename of the saved WAV file.
+        """
         buffers = min(self.rate // self.frames_per_buffer, self.MAX_BUFFER_SIZE)
         window = deque(maxlen=self.DEFAULT_SILENCE_LIMIT * buffers) # when all the samples in the window falls below threshold, we can assume a silence 
         append_audio = window.copy()
@@ -121,35 +119,34 @@ class Recorder(object):
         audio2send = bytearray()
         while prepend_audio:
             pd = prepend_audio.popleft()
-            LOG.info(f"starting frame length {len(pd)}")
+            LOG.debug(f"starting frame length {len(pd)}")
             audio2send.extend(pd)
 
-        # time.sleep(self.DEFAULT_SLEEP_SECONDS) # this line is causing the streams to go away when we start the stream and sleep for 2 seconds
-        # sleeping for 2 seconds to make sure the program doesn't exit before we have started speaking
         LOG.info("starting record of phrase")
         while (self.speech_detected(window, threshold)):
             cur_data = stream.read(self.frames_per_buffer)
             window.append(self.get_rms(cur_data)) # Calculating RMS value of the current stream
-            LOG.info(f"current frame length: {len(cur_data)}")
+            LOG.debug(f"current frame length: {len(cur_data)}")
             append_audio.append(cur_data)
             audio2send.extend(cur_data)
 
         while append_audio:
             ad = append_audio.pop()
-            LOG.info(f"ending frame length {len(ad)}")
+            LOG.debug(f"ending frame length {len(ad)}")
             audio2send.extend(ad)
 
         LOG.info("done recording...")
-        filename = self.save_speech_new(audio2send, width)
+        filename = self.save_speech(audio2send, width)
         LOG.info(f"saved file {filename}")
         return filename
     
-    def save_speech_new(self, data, width):
+    def save_speech(self, data, width):
         """
         Save recorded audio data to a temporary WAV file.
 
         Args:
             data: The audio data.
+            width: The width of the audio data
         Returns:
             filename: The filename of the saved WAV file.
         """
@@ -205,10 +202,11 @@ class Recorder(object):
         """
 
         LOG.info("getting intensity values from mic")
-        LOG.debug(f"microphone info: {self._pyaudio.get_default_input_device_info()}")
+        pa = pyaudio.PyAudio()
+        LOG.debug(f"microphone info: {pa.get_default_input_device_info()}")
 
         if not stream:
-            stream = self._pyaudio.open(format=self.format, channels=self.channels, rate=self.rate, 
+            stream = pa.open(format=self.format, channels=self.channels, rate=self.rate, 
                                         input=self.input, frames_per_buffer=self.frames_per_buffer)
 
         values = [self.get_rms(stream.read(self.frames_per_buffer), self.DEFAULT_WIDTH) for _ in range(samples)] # Calculating the RMS value of the audio stream
@@ -219,24 +217,6 @@ class Recorder(object):
         LOG.info(f"average audio intensity is:{intensity}")
         stream.close()
     
-        self._pyaudio.terminate()
+        pa.terminate()
         return intensity
-    
-    def save_speech(self, data):
-        """
-        Save recorded audio data to a temporary WAV file.
-
-        Args:
-            data: The audio data.
-        Returns:
-            filename: The filename of the saved WAV file.
-        """
-        filename = 'output_'+str(int(time.time()))
-        wf = wave.open(filename + '.wav', 'wb')
-        wf.setnchannels(self.DEFAULT_CHANNELS)
-        wf.setsampwidth(self._pyaudio.get_sample_size(pyaudio.paInt16))
-        wf.setframerate(self.DEFAULT_RATE)
-        wf.writeframes(data)
-        wf.close()
-        return filename + '.wav'
     

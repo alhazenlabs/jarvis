@@ -1,27 +1,33 @@
 import os
+from google.cloud import texttospeech
+
+
+def _get_key(key, err_message):
+    value = os.environ.get(key)
+
+    if not value:
+        raise KeyError(err_message)
+    
+    return value
+
 
 def get_openai_key():
-    key = os.environ.get("API_KEY")
+    return _get_key("API_KEY", "missing Open AI api key. Login to OPEN AI, generate key and update API_KEY environment variable")
 
-    if not key:
-        raise KeyError("missing Open AI api key. Login to OPEN AI, generate key and update API_KEY environment variable")
-    
-    return key
 
 def get_porcupine_access_key():
-    key = os.environ.get("PICOVOICE_KEY")
+    return _get_key("PICOVOICE_KEY", "missing porcupine access key, signup on https://console.picovoice.ai/, and update PICOVOICE_KEY env varaible")
 
-    if not key:
-        raise KeyError("missing porcupine access key, signup on https://console.picovoice.ai/, and update PICOVOICE_KEY env varaible")
-
-    return key
 
 def get_input_speech_threshold():
     # TODO make this function such that it calculates the speech threshold on the fly
     threshold = int(os.environ.get("DEFAULT_INPUT_SPEECH_THRESHOLD", 600))
     return threshold
 
+
 class Constants(object):
+    LOG_LEVEL = "DEBUG"
+
     API_KEY = get_openai_key()
     DEFAULT_INPUT_SPEECH_THRESHOLD = get_input_speech_threshold()
     PORCUPINE_ACCESS_KEY = get_porcupine_access_key()
@@ -32,6 +38,10 @@ class Constants(object):
 
     # MEDIA OUTPUT CONSTANTS
     MEDIA_FOLDER = "media/"
+    DIRECTORY_PREFIX = "shard{}/"
+    SHARD_LENGTH = 2000
+    STANDARD_MEDIA_DIRECTORY = "media/standard/"
+    SQLITE_DB = "jarvis.db"
 
     # WAKE CONSTANTS
     DEFAULT_WAKE_KEYWORDS = ['jarvis', 'alexa']
@@ -54,9 +64,8 @@ class Constants(object):
     DEFAULT_PERCENTAGE = 1 # 100 %
 
     # SYNTHESIZE CONSTANTS
-    DEFAULT_OUTPUT_ACCENT = "co.uk" # British Accent
-    DEFAULT_OUTPUT_LANGUAGE = "en"
-    DEFAULT_OUTPUT_IS_SLOW = False
+    DEFAULT_OUTPUT_ACCENT = texttospeech.SsmlVoiceGender.FEMALE
+    DEFAULT_OUTPUT_LANGUAGE = "en-GB"
     DEFAULT_OUTPUT_FILE_FORMAT = "{}.mp3"
 
     # PLAYER CONSTANTS

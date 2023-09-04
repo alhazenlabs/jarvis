@@ -1,22 +1,22 @@
-import os
 import struct
-import pyaudio
 import pvporcupine
 from utils.constants import Constants
 
-
-# AccessKey obtained from Picovoice Console (https://console.picovoice.ai/)
-
-
-# Parameters for PyAudio
-pa = None
-audio_stream = None
-pa_format = pyaudio.paInt16
-pa_channels = 1
-pa_rate = 16000
-pa_frames_per_buffer = 512
-
 class WakeDetector(object):
+    """
+    A class for detecting wake keywords using Porcupine keyword spotting.
+
+    Attributes:
+        PC (pvporcupine.Porcupine): An instance of Porcupine keyword spotting engine.
+        DEFAULT_FRAMES_PER_BUFFER (int): The default number of frames per buffer for audio processing.
+
+    Class Methods:
+        detect(frames)
+            Detects a wake keyword in the provided audio frames.
+
+    Usage:
+        WakeDetector.detect(frames)  # Returns True if a wake keyword is detected, False otherwise.
+    """
     
     PC = pvporcupine.create(
         access_key=Constants.PORCUPINE_ACCESS_KEY, 
@@ -26,36 +26,16 @@ class WakeDetector(object):
     DEFAULT_FRAMES_PER_BUFFER = Constants.DEFAULT_FRAMES_PER_BUFFER # Porcupine complains when frames per buffer is greater than 512
 
     @classmethod
-    def detect(cls, frames):
-        pcm = struct.unpack_from("h" * cls.DEFAULT_FRAMES_PER_BUFFER, frames)
+    def detect(cls, frame):
+        """
+        Detects a wake keyword in the provided audio frame.
+
+        Args:
+            frame (bytes): Audio frame to analyze for wake keyword detection.
+
+        Returns:
+            bool: True if a wake keyword is detected, False otherwise.
+        """
+        pcm = struct.unpack_from("h" * cls.DEFAULT_FRAMES_PER_BUFFER, frame)
         keyword_index = cls.PC.process(pcm)
         return keyword_index >= 0
-
-
-if __name__== "__main__":
-    print("Listening... Press Ctrl+C to exit")
-
-    pa = pyaudio.PyAudio()
-
-    # Open audio stream
-    audio_stream = pa.open(
-        rate=pa_rate,
-        channels=pa_channels,
-        format=pa_format,
-        input=True,
-        frames_per_buffer=pa_frames_per_buffer,
-    )
-
-    try:
-        while True:
-            frames = audio_stream.read(pa_frames_per_buffer)
-            if WakeDetector.detect(frames):
-                print("jarvis detected")
-                print("application logic should be below")
-    except KeyboardInterrupt:
-        print("Stopping... the application")
-    finally:
-        if audio_stream is not None:
-            audio_stream.close()
-        if pa is not None:
-            pa.terminate()

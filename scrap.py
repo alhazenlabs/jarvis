@@ -21,3 +21,45 @@ text2= "Sorry,  I couldn't understand what you are trying to say. Can you speak 
 if __name__ == "__main__":
     out = TextToSpeechDao.synthesize(text1)
     TextToSpeechDao.synthesize(text2)
+
+
+
+
+# if __name__== "__main__":
+#     # AccessKey obtained from Picovoice Console (https://console.picovoice.ai/)
+
+#     # Parameters for PyAudio
+#     pa = None
+#     audio_stream = None
+#     pa_format = pyaudio.paInt16
+#     pa_channels = 1
+#     pa_rate = 16000
+#     pa_frames_per_buffer = 512
+
+#     print("Listening... Press Ctrl+C to exit")
+
+#     pa = pyaudio.PyAudio()
+
+#     # Open audio stream
+#     audio_stream = pa.open(
+#         rate=pa_rate,
+#         channels=pa_channels,
+#         format=pa_format,
+#         input=True,
+#         frames_per_buffer=pa_frames_per_buffer,
+#     )
+
+#     try:
+#         while True:
+#             frames = audio_stream.read(pa_frames_per_buffer)
+#             if WakeDetector.detect(frames):
+#                 print("jarvis detected")
+#                 print("application logic should be below")
+#     except KeyboardInterrupt:
+#         print("Stopping... the application")
+#     finally:
+#         if audio_stream is not None:
+#             audio_stream.close()
+#         if pa is not None:
+#             pa.terminate()
+

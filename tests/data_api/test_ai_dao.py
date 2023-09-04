@@ -38,7 +38,7 @@ class TestAiDao(unittest.TestCase):
         response = self.ai._get_response("Hello")
         self.assertEqual(response, "AI response")
     
-    @patch("data_api.prompt_dao.PromptDao.addPrompt")
+    @patch("data_api.prompt_dao.PromptDao.add_prompt")
     def test_add_responses_to_db(self, mock_add_prompt):
         self.ai.context = "Test Context"
         self.ai._save_responses()

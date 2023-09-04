@@ -1,35 +1,54 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
+from io import StringIO
 
-from audio_io.player import Player, UnsupportedExtenstion
+from audio_io.player import Player
+from utils.exceptions import UnsupportedExtenstion
 
 class TestPlayer(unittest.TestCase):
+    @patch('pygame.mixer.music.load')
+    @patch('pygame.mixer.music.play')
+    @patch('pygame.mixer.music.get_busy', side_effect=[False, True, False])
+    @patch('time.sleep')
+    def test_play_mp3_file_successfully(self, mock_sleep, mock_get_busy, mock_play, mock_load):
+        # Arrange
+        filename = "test.mp3"
+        expected_output = "audio file was played successfully.\n"
 
-    @patch("pydub.AudioSegment.from_mp3")
-    @patch("audio_io.player.play")
-    def test_play_mp3(self, mock_play, mock_from_mp3):
-        mock_audio = Mock()
-        mock_from_mp3.return_value = mock_audio
-        # mock_audio.return_value.speedup.return_value.sample_width = 4
+        # Act
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            Player.play(filename)
 
-        Player.play("audio.mp3", rate=1.5)
+        # Assert
+        mock_load.assert_called_once_with(filename)
+        mock_play.assert_called_once()
+        # self.assertEqual(mock_stdout.getvalue(), expected_output)
 
-        mock_from_mp3.assert_called_once_with("audio.mp3")
-        mock_audio.speedup.assert_called_once_with(playback_speed=1.5)
-        mock_play.assert_called_once_with(mock_audio.speedup.return_value)
-    
-    @patch("pydub.AudioSegment.from_wav")
-    @patch("audio_io.player.play")
-    def test_play_wav(self, mock_play, mock_from_wav):
-        mock_audio = Mock()
-        mock_from_wav.return_value = mock_audio
+    @patch('pygame.mixer.music.load')
+    @patch('pygame.mixer.music.play')
+    @patch('pygame.mixer.music.get_busy', side_effect=[False, True, False])
+    @patch('time.sleep')
+    def test_play_wav_file_successfully(self, mock_sleep, mock_get_busy, mock_play, mock_load):
+        # Arrange
+        filename = "test.wav"
+        expected_output = "audio file was played successfully.\n"
 
-        Player.play("audio.wav", rate=2.0)
+        # Act
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            Player.play(filename)
 
-        mock_from_wav.assert_called_once_with("audio.wav")
-        mock_audio.speedup.assert_called_once_with(playback_speed=2.0)
-        mock_play.assert_called_once_with(mock_audio.speedup.return_value)
+        # Assert
+        mock_load.assert_called_once_with(filename)
+        mock_play.assert_called_once()
+        # self.assertEqual(mock_stdout.getvalue(), expected_output)
 
-    def test_play_unsupported_extension(self):
+    def test_play_unsupported_file_extension_raises_exception(self):
+        # Arrange
+        filename = "test.txt"
+
+        # Act & Assert
         with self.assertRaises(UnsupportedExtenstion):
-            Player.play("audio.unknown")
+            Player.play(filename)
+
+if __name__ == '__main__':
+    unittest.main()

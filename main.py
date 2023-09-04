@@ -81,34 +81,3 @@ if __name__== "__main__":
             audio_stream.close()
         if pa is not None:
             pa.terminate()
-
-# if __name__ == "__main__":
-#     load_db()
-
-#     r = Recorder()
-#     ai = AiDao()
-
-#     LOG.info("0. Begin")
-#     filename = r.record()
-#     LOG.info(f"1. Recorded the audio for transcription file:{filename}")
-    # filename = "output_1692858036.wav"
-
-    # transcript = SpeechToTextDao.transcribe_speech(filename)
-    # LOG.info(f"2. recorded transcript input is :{transcript}")
-
-    # file = mapInputSpeechToText(transcript, filename)
-    # LOG.info(f"3. mapped input speech to text {file}")
-    # os.remove(filename)
-
-    # response = ai.get_and_save_response(transcript)
-    # LOG.info(f"4. recieved ai response is :{response}")
-
-    # output_audio = TextToSpeechDao.synthesize(response)
-    # LOG.info(f"5. synthesized text to speech in file:{output_audio}")
-
-    # Player.play(output_audio)
-    # LOG.info(f"6. Audio successfully played:{output_audio}")
-    # tts.save_and_play()
-
-
-

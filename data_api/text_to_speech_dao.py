@@ -1,7 +1,4 @@
-import time
-import requests
 from google.cloud import texttospeech
-# from gtts import gTTS, gTTSError
 
 from utils.constants import Constants
 from utils.db import terminating_sn
@@ -9,26 +6,27 @@ from utils.file import generateSpeechFileName, getDirectoryforSpeechSave, error_
 from utils.logger import LOG
 
 
-# def with_retry(function, *args, retries=3, backoff=1):
-#     for _ in range(retries):
-#         try:
-#             return function(*args)
-#         except (requests.ConnectionError, gTTSError) as e:
-#             if isinstance(e, gTTSError) and "Failed to connect" not in str(e):
-#                 raise e
-
-#             LOG.info("connection error. retrying in a moment.")
-#             time.sleep(backoff)
-    
-#     LOG.info("max retries exceeded. translation failed")
-#     raise gTTSError("max retries exceeded. translation failed")
-
-
-
 class TextToSpeechDao(object):
+    """
+    A class for converting text to speech using the Google Text-to-Speech API.
+
+    Attributes:
+        ACCENT (str): The accent of the generated speech.
+        LANGUAGE (str): The language of the generated speech.
+        FILE_FORMAT (str): The default file format for saving generated speech.
+        client (texttospeech.TextToSpeechClient): The Google Text-to-Speech client instance.
+        voice (texttospeech.VoiceSelectionParams): The voice selection parameters.
+        audio_config (texttospeech.AudioConfig): The audio configuration for generated speech.
+
+    Methods:
+        synthesize(text): Converts the provided text into speech and saves it to a file.
+
+    Usage:
+        tts_dao = TextToSpeechDao()
+        file_path = tts_dao.synthesize("Hello, how are you?")
+    """
+     
     ACCENT = Constants.DEFAULT_OUTPUT_ACCENT
-    LANGUAGE = Constants.DEFAULT_OUTPUT_LANGUAGE
-    IS_SLOW = Constants.DEFAULT_OUTPUT_IS_SLOW
     FILE_FORMAT = Constants.DEFAULT_OUTPUT_FILE_FORMAT
 
     client = texttospeech.TextToSpeechClient()
@@ -36,16 +34,29 @@ class TextToSpeechDao(object):
     # Build the voice request, select the language code ("en-US") and the ssml
     # voice gender ("neutral")
     voice = texttospeech.VoiceSelectionParams(
-        language_code="en-GB", ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
+        language_code=Constants.DEFAULT_OUTPUT_LANGUAGE, ssml_gender=Constants.DEFAULT_OUTPUT_ACCENT
     )
 
     # Select the type of audio file you want returned
     audio_config = texttospeech.AudioConfig(
         audio_encoding=texttospeech.AudioEncoding.MP3
+        # speaking_rate, sample_rate_hertz 
     )
 
     @classmethod
     def synthesize(cls, text):
+        """
+        Converts the provided text into speech and saves it to a file.
+
+        Args:
+            text (str): The text to be converted into speech.
+
+        Returns:
+            str: The file path where the generated speech is saved.
+
+        Raises:
+            Exception: If an error occurs during the conversion.
+        """
         try:
             synthesis_input = texttospeech.SynthesisInput(text=text)
             with terminating_sn() as session:
