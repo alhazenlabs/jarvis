@@ -8,7 +8,7 @@ virtualenv ENV
 source ENV/bin/activate
 pip install -r requirements.txt
 pip install coverage
-
+          
 coverage run  -m unittest discover -s . -p 'test_*.py' && coverage xml
 
 

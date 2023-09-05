@@ -23,12 +23,16 @@ def delete_contents(folder):
 
 class TestAiDao(unittest.TestCase):
 
-    def setUp(self) -> None:
+    @classmethod
+    def setUpClass(cls) -> None:
         print("loading the test database")
+        if not os.path.exists(TESTS_MEDIA):
+            os.mkdir(TESTS_MEDIA)
         utils.db.load_db()
-        self.ai = AiDao()
+        cls.ai = AiDao()
     
-    def tearDown(self) -> None:
+    @classmethod
+    def tearDownClass(cls) -> None:
         print("deleting the test database")
         delete_contents(TESTS_MEDIA)
 
