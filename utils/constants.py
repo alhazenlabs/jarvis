@@ -1,11 +1,12 @@
 import os
 from google.cloud import texttospeech
 
+UT_MODE = int(os.environ.get("UT_MODE", 0)) # 1 for setting UT mode to true, 0 for non UT mode
 
 def _get_key(key, err_message):
     value = os.environ.get(key)
 
-    if not value:
+    if not value and not UT_MODE:
         raise KeyError(err_message)
     
     return value
