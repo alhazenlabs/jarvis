@@ -7,7 +7,7 @@ on:
 jobs:
   start:
     runs-on: ubuntu-latest
-    # environment: AWS-EC2-T2-MICRO
+    environment: Jarvis-CI
 
     steps:
       - name: Check out code
