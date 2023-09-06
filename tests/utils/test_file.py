@@ -8,12 +8,6 @@ from pydub import AudioSegment
 from data_api.sftt_dao import SfttDao
 from utils.constants import Constants
 from utils.exceptions import UnsupportedExtenstion
-# from utils.file import (
-#     generateSpeechFileName,
-#     getDirectoryforSpeechSave,
-#     error_response,
-#     mapInputSpeechToText,
-# )
 
 class TestYourModule(unittest.TestCase):
     def setUp(self):
